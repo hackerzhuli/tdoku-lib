@@ -10,16 +10,16 @@
 #include <stdint.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct GenerateOut9x9{
     uint32_t num_clues;
     float mean_guesses;
     float loss;
     char data[81];
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Solves a Sudoku or Pencilmark Sudoku puzzle.
@@ -105,14 +105,14 @@ bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
  */
 size_t GenerateSudoku9x9(size_t num, int clues_to_drop, int num_evals, float clue_weight,
     float guess_weight,
-    float random_weight, GenerateOut9x9* buffer);
+    float random_weight, struct GenerateOut9x9* buffer);
 
 /**
  * Generate classic sudoku puzzles 9x9, with default parameters
  * @return
  *       The number of puzzles generated
  */
-size_t GenerateSudoku9x9Default(size_t num, GenerateOut9x9* buffer);
+size_t GenerateSudoku9x9Default(size_t num, struct GenerateOut9x9* buffer);
 
 #ifdef __cplusplus
 }
@@ -121,6 +121,7 @@ size_t GenerateSudoku9x9Default(size_t num, GenerateOut9x9* buffer);
 static inline bool Minimize(bool pencilmark, bool monotonic, char *puzzle) {
     return TdokuMinimize(pencilmark, monotonic, puzzle);
 }
+
 static inline bool Constrain(bool pencilmark, char *puzzle) {
     return TdokuConstrain(pencilmark, puzzle);
 }
