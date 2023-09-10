@@ -44,7 +44,7 @@ python3 example/solve.py data/puzzles0_kaggle
 
 
 #### Origin
-This Project is forked from [tdoku][https://github.com/t-dillon/tdoku/tree/master]. The purpose is to combine the generator into the tdoku library, instead of an executable. So it can be easily used with an c interface.
+This Project is forked from [tdoku](https://github.com/t-dillon/tdoku/tree/master). The purpose is to contain the generator into the tdoku library, instead of an executable. So it can be easily used with an c interface.
 
-Also, benchmarks and other solvers are deleted so it is simpler for users who just want to use the tdoku library.
+Also, benchmarks, other solvers and docs are deleted so it is simpler for users who just want to use the tdoku library.
 
