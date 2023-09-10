@@ -40,6 +40,27 @@ extern "C" {
  *       Pointer to an 81 character array to receive the solution. Tdoku will only return
  *       a solution if it was given a limit of 1. Otherwise it's assumed we're just interested
  *       in solution counts (e.g., 0, 1, 2+).
+ * @param solver
+ *       0, for the SIMD solver, 1 for scc solver, 2 for basic solver, note that basic solver does not support pencilmark, always return false
+ * @param num_guesses
+ *       Out parameter to receive the number of guesses performed during search.
+ * @return
+ *       whether a solution is found
+ */
+bool TdokuSolve(const char *input, int solver, char *solution, size_t *num_guesses);
+
+/**
+ * Solves a Sudoku or Pencilmark Sudoku puzzle.
+ * @param input
+ *       same as TdokuSolve
+ * @param limit
+ *       The maximum number of solutions to find before returning.
+ * @param configuration
+ *       Solver-specific configuration. Unused for tdoku.
+ * @param solution
+ *       Pointer to an 81 character array to receive the solution. Tdoku will only return
+ *       a solution if it was given a limit of 1. Otherwise it's assumed we're just interested
+ *       in solution counts (e.g., 0, 1, 2+).
  * @param num_guesses
  *       Out parameter to receive the number of guesses performed during search.
  * @return
@@ -50,6 +71,47 @@ size_t TdokuSolverDpllTriadSimd(const char *input,
                                 uint32_t configuration,
                                 char *solution,
                                 size_t *num_guesses);
+
+/**
+ * Solves a Sudoku or Pencilmark Sudoku puzzle.
+ * @param input
+ *      same as TdokuSolve
+ * @param limit
+ *       The maximum number of solutions to find before returning.
+ * @param configuration
+ *       Solver-specific configuration. Unused for tdoku.
+ * @param solution
+ *       Pointer to an 81 character array to receive the solution. Tdoku will only return
+ *       a solution if it was given a limit of 1. Otherwise it's assumed we're just interested
+ *       in solution counts (e.g., 0, 1, 2+).
+ * @param num_guesses
+ *       Out parameter to receive the number of guesses performed during search.
+ * @return
+ *       The number of solutions found up to the given limit.
+ */
+size_t TdokuSolverDpllTriadScc(const char *input, size_t limit, uint32_t configuration,
+                               char *solution, size_t *num_guesses);
+
+
+/**
+ * Solves a Sudoku puzzle.
+ * @param input
+ *      same as TdokuSolve
+ * @param limit
+ *       The maximum number of solutions to find before returning.
+ * @param configuration
+ *       Solver-specific configuration. Unused for tdoku.
+ * @param solution
+ *       Pointer to an 81 character array to receive the solution. Tdoku will only return
+ *       a solution if it was given a limit of 1. Otherwise it's assumed we're just interested
+ *       in solution counts (e.g., 0, 1, 2+).
+ * @param num_guesses
+ *       Out parameter to receive the number of guesses performed during search.
+ * @return
+ *       The number of solutions found up to the given limit.
+ */
+size_t TdokuSolverBasic(const char *input, size_t limit, uint32_t configuration,
+                        char *solution, size_t *num_guesses);
 
 /**
  * Enumerates all solutions to a given Sudoku or Pencilmark Sudoku puzzle.
@@ -100,19 +162,38 @@ bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
 
 /**
  * Generate classic sudoku puzzles 9x9
+ * @param num
+ *       number of puzzles the generate
+ * @param pencilmark
+ *       A boolean indicating whether to minimize a pencilmark sudoku (vs. a vanilla one)
  * @return
- *       The number of puzzles generated
+ *       The number of puzzles generated, up to num
  */
-size_t GenerateSudoku9x9(size_t num, int clues_to_drop, int num_evals, float clue_weight,
-    float guess_weight,
-    float random_weight, struct GenerateOut9x9* buffer);
+size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer);
 
 /**
- * Generate classic sudoku puzzles 9x9, with default parameters
+ * returns an rating of the puzzle
+ * 
+ * rating formula:
+ * 
+ * ln(n_guess + 1) / ln(9) * 1000
+ * 
+ * ln() is natural log
+ * n_guess is the number of guesses the solver performed
+ * 
+ * an average rating is obtained by solving the permutations of the same puzzle num_evals times
+ * 
+ * Note: this method is slower, the solver is called num_evals times under the hood
+ * @param input
+ *      same as TdokuSolve
+ * @param solver
+ *       0, for the SIMD solver, 1 for scc solver, 2 for basic solver
+ * @param num_evals
+ *      the number of times the solver runs to obtain an average rating
  * @return
- *       The number of puzzles generated
+ *       The rating, if puzzle is not supported by solver, 100 is returned
  */
-size_t GenerateSudoku9x9Default(size_t num, struct GenerateOut9x9* buffer);
+int TdokuRate(char *input, int solver, int num_evals);
 
 #ifdef __cplusplus
 }
