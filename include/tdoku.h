@@ -163,13 +163,17 @@ bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
 /**
  * Generate classic sudoku puzzles 9x9
  * @param num
- *       number of puzzles the generate
+ *       number of puzzles to generate
  * @param pencilmark
  *       A boolean indicating whether to minimize a pencilmark sudoku (vs. a vanilla one)
+ * @param buffer
+ *       The output puzzles
+ * @param separator
+ *       A seperator is appended at the end of each puzzle
  * @return
- *       The number of puzzles generated, up to num
+ *       The number of puzzles generated, up to num, note that no puzzle is guaranteed to generate
  */
-size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer);
+size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer, char separator);
 
 /**
  * returns an rating of the puzzle

@@ -2,7 +2,7 @@
 #include "util.h"
 
 double MeanLogGuesses(char *puzzle, bool pencilmark, int solver, int num_evals) {
-    Util util=Util();
+    Util util{};
     char solution[81];
     double sum_log_guesses = 0.0;
     int count = 0;
@@ -40,7 +40,6 @@ bool TdokuSolve(const char *input, int solver, char *solution, size_t *num_guess
             return !pencilmark && TdokuSolverDpllTriadScc(input, 1, 0, solution, num_guesses) > 0;
         case 2:
             return TdokuSolverBasic(input, 1, 0, solution, num_guesses) > 0;
-        default:
     }
 
     return false;

@@ -40,10 +40,8 @@ struct Options {
     int clues_to_drop = 3;
     int num_evals = 10;
     int num_puzzles_in_pool = 500;
-    bool display_all = false;
     bool minimize = true;
     bool pencilmark = false;
-    int solver = 0;
 };
 
 struct Generator {
@@ -89,23 +87,7 @@ struct Generator {
         for (int j = 0; j < options_.num_evals; j++) {
             util_.PermuteSudoku(puzzle, options_.pencilmark);
             size_t guesses = 0;
-            if (options_.solver == 1) {
-#ifdef MINISAT
-                OtherSolverMiniSat(puzzle, 1, 3, solution, &guesses);
-#else
-                cout << "Must build with -DMINISAT=on to use minisat" << endl;
-                exit(1);
-#endif
-            } else if (options_.solver == 2) {
-#ifdef GUROBI
-                OtherSolverGurobi(puzzle, 2, 0, solution, &guesses);
-#else
-                cout << "Must build with -DGUROBI=on to use gurobi" << endl;
-                exit(1);
-#endif
-            } else {
-                TdokuSolverDpllTriadSimd(puzzle, 1, 0, solution, &guesses);
-            }
+            TdokuSolverDpllTriadSimd(puzzle, 1, 0, solution, &guesses);
             sum_log_guesses += log((double) guesses + 1);
         }
         return options_.num_evals == 0 ? 0.0 : sum_log_guesses / options_.num_evals;
@@ -169,7 +151,7 @@ struct Generator {
         make_heap(pattern_heap.begin(), pattern_heap.end());
     }
 
-    void Generate(GenerateOut9x9* output_puzzles, uint32_t* out_count) {
+    size_t Generate(char* output_puzzles, char separator) {
         char puzzle[729];
         uint32_t count = 0;
 
@@ -227,28 +209,14 @@ struct Generator {
                 }
             }
 
-            // if (options_.display_all) {
-            //     printf("%.729s %d %.1f %.2f\n", puzzle, num_clues, geo_mean_guesses, loss);
-            // }
-
-            // skip if the puzzle's loss is greater than the highest in the pool
             if (loss > pattern_heap.front().first) {
                 continue;
             }
 
-            if (!options_.display_all) {
-                printf("%.729s %d %.1f %.2f\n", puzzle, num_clues, geo_mean_guesses, loss);
-            }
-
-            GenerateOut9x9 out;
-            out.num_clues = num_clues;
-            out.mean_guesses = geo_mean_guesses;
-            out.loss = loss;
-            memcpy(out.data, puzzle, size);
-
-            output_puzzles[count] = out;
+            // copy to output and append an separator
+            memcpy(output_puzzles + count * (size + 1), puzzle, size);
+            output_puzzles[count * (size + 1) + size] = separator;
             count++;
-
 
             // ooadd the generated puzzle to the pl and kick out the one with highest loss
             pattern_set.insert(puzzle);
@@ -261,6 +229,14 @@ struct Generator {
             pattern_heap.pop_back();
         }
 
-        *out_count = count;
+        return count;
     }
 };
+
+extern "C"
+size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer, char separator){
+    Options options = Options();
+    options.pencilmark = pencilmark;
+    Generator g(options);
+    return g.Generate(buffer, separator);
+}

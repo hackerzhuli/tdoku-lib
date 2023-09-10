@@ -41,7 +41,12 @@ python3 example/solve.py data/puzzles0_kaggle
 
 
 #### Origin
-This Project is forked from [tdoku](https://github.com/t-dillon/tdoku/tree/master). The purpose is to contain the generator into the tdoku library, instead of an executable. So it can be easily used with an c interface.
+This Project is forked from [tdoku](https://github.com/t-dillon/tdoku/tree/master). The purpose is adapt it to an library with an C interface. Easy for any language to call from.
 
-Also, benchmarks, other solvers and docs are deleted so it is simpler for users who just want to use the tdoku library.
+Added:
+    TdokuSolve: an utility function with simplified interface to solve an puzzle
+    TdokuGenerate: generate an puzzle
+    TdokuRate: rate an puzzle using solvers of tdoku library
 
+Removed:
+    Benchmarks and other solvers and docs are removed so it only contains useful stuff for people who want to use the tdoku library.
