@@ -1,17 +1,22 @@
 #include "../include/tdoku.h"
 #include "util.h"
+#include <cstring>
 
-double MeanLogGuesses(char *puzzle, bool pencilmark, int solver, int num_evals) {
+
+double MeanLogGuesses(const char *puzzle, bool pencilmark, int solver, int num_evals) {
     Util util{};
     char solution[81];
     double sum_log_guesses = 0.0;
+    char copy[792];
+    memcpy(copy, puzzle, pencilmark? 792:82);
+    
     int count = 0;
     for (int j = 0; j < num_evals; j++) {
-        util.PermuteSudoku(puzzle, pencilmark);
+        util.PermuteSudoku(copy, pencilmark);
         size_t guesses = 0;
 
         // it may not solve, because some solvers doesn't support pencilmark
-        if(TdokuSolve(puzzle, solver, solution, &guesses)){
+        if(TdokuSolve(copy, solver, solution, &guesses)){
             sum_log_guesses += log((double) guesses + 1);
             count++;
         }
@@ -21,7 +26,7 @@ double MeanLogGuesses(char *puzzle, bool pencilmark, int solver, int num_evals) 
 }
 
 extern "C"
-int TdokuRate(char *input, int solver, int num_evals){
+int TdokuRate(const char *input, int solver, int num_evals){
     bool pencilmark = input[81] >= '.';
     
     double l = MeanLogGuesses(input, pencilmark, solver, num_evals);

@@ -197,7 +197,7 @@ size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer, char separator);
  * @return
  *       The rating, if puzzle is not supported by solver, 100 is returned
  */
-int TdokuRate(char *input, int solver, int num_evals);
+int TdokuRate(const char *input, int solver, int num_evals);
 
 #ifdef __cplusplus
 }
