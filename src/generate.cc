@@ -238,5 +238,6 @@ size_t TdokuGenerate(size_t num, bool pencilmark, char* buffer, char separator){
     Options options = Options();
     options.pencilmark = pencilmark;
     Generator g(options);
+    g.InitEmpty();
     return g.Generate(buffer, separator);
 }
