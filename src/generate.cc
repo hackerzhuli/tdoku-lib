@@ -33,7 +33,7 @@ size_t OtherSolverGurobi(const char *input,
 }
 
 struct Options {
-    uint64_t max_puzzles = UINT64_MAX;
+    uint32_t max_puzzles = 1;
     double clue_weight = 1.0;
     double guess_weight = 0.5;
     double random_weight = 1.0;
@@ -42,8 +42,8 @@ struct Options {
     int num_puzzles_in_pool = 500;
     bool display_all = false;
     bool minimize = true;
-    bool pencilmark = true;
-    int solver = 1;
+    bool pencilmark = false;
+    int solver = 0;
 };
 
 struct Generator {
@@ -169,8 +169,9 @@ struct Generator {
         make_heap(pattern_heap.begin(), pattern_heap.end());
     }
 
-    void Generate() {
+    void Generate(GenerateOut9x9* output_puzzles, uint32_t* out_count) {
         char puzzle[729];
+        uint32_t count = 0;
 
         size_t size = options_.pencilmark ? 729 : 81;
         for (uint64_t i = 0; i < options_.max_puzzles; i++) {
@@ -226,9 +227,9 @@ struct Generator {
                 }
             }
 
-            if (options_.display_all) {
-                printf("%.729s %d %.1f %.2f\n", puzzle, num_clues, geo_mean_guesses, loss);
-            }
+            // if (options_.display_all) {
+            //     printf("%.729s %d %.1f %.2f\n", puzzle, num_clues, geo_mean_guesses, loss);
+            // }
 
             // skip if the puzzle's loss is greater than the highest in the pool
             if (loss > pattern_heap.front().first) {
@@ -239,7 +240,17 @@ struct Generator {
                 printf("%.729s %d %.1f %.2f\n", puzzle, num_clues, geo_mean_guesses, loss);
             }
 
-            // add the generated puzzle to the pool and kick out the one with highest loss
+            GenerateOut9x9 out;
+            out.num_clues = num_clues;
+            out.mean_guesses = geo_mean_guesses;
+            out.loss = loss;
+            memcpy(out.data, puzzle, size);
+
+            output_puzzles[count] = out;
+            count++;
+
+
+            // ooadd the generated puzzle to the pl and kick out the one with highest loss
             pattern_set.insert(puzzle);
             pattern_heap.emplace_back(make_pair(loss, puzzle));
             push_heap(pattern_heap.begin(), pattern_heap.end());
@@ -249,87 +260,7 @@ struct Generator {
             }
             pattern_heap.pop_back();
         }
+
+        *out_count = count;
     }
 };
-
-int main(int argc, char **argv) {
-    Options options{};
-
-    ketopt_t opt = KETOPT_INIT;
-    char c;
-    while ((c = (char) ketopt(&opt, argc, argv, 1, "a::c:d:e:g:hl:m:n:p::r:s:u", nullptr)) != -1) {
-        switch (c) {
-            case 'c': {
-                options.clue_weight = stod(opt.arg);
-                break;
-            }
-            case 'g': {
-                options.guess_weight = stod(opt.arg);
-                break;
-            }
-            case 'r': {
-                options.random_weight = stod(opt.arg);
-                break;
-            }
-            case 'd': {
-                options.clues_to_drop = stoi(opt.arg);
-                break;
-            }
-            case 'e': {
-                options.num_evals = stoi(opt.arg);
-                break;
-            }
-            case 'l': {
-                options.max_puzzles = stoll(opt.arg);
-                break;
-            }
-            case 'm': {
-                options.minimize = opt.arg == nullptr ? true : stoi(opt.arg) > 0;
-                break;
-            }
-            case 'n': {
-                options.num_puzzles_in_pool = stoi(opt.arg);
-                break;
-            }
-            case 'a': {
-                options.display_all = opt.arg == nullptr ? true : stoi(opt.arg) > 0;
-                break;
-            }
-            case 'p': {
-                options.pencilmark = opt.arg == nullptr ? true : stoi(opt.arg) > 0;
-                break;
-            }
-            case 's': {
-                options.solver = stoi(opt.arg);
-                break;
-            }
-            case 'h':
-            default: {
-                cout << "usage: generate <options> <pattern_file>\n" << endl;
-                cout << "options:\n" << endl;
-                cout << "  -c <clue_weight>    scoring weight for number of clues\n";
-                cout << "  -g <guess weight>   scoring weight(exponent) for geo mean guesses\n";
-                cout << "  -r <random weight>  scoring weight for uniform noise\n";
-                cout << "  -d <drop>           number of clues to drop before re-completing\n";
-                cout << "  -e <num_evals>      number of permutations to eval for guess estimate\n";
-                cout << "  -l <limit>          limit number of puzzles to generate\n";
-                cout << "  -m [0|1]            minimize generated puzzles\n";
-                cout << "  -n <pool size>      number of top scored puzzles to keep in pool\n";
-                cout << "  -a [0|1]            display all puzzles (not just top scored)\n";
-                cout << "  -p [0|1]            generate pencilmark puzzles\n";
-                cout << "  -s [0|1|2]          solver for eval: 0=tdoku,1=minisat,2=gurobi\n";
-                cout << "  -h                  display this help message\n";
-                exit(0);
-            }
-        }
-    }
-
-    Generator generator(options);
-    if (argc == opt.ind) {
-        generator.InitEmpty();
-    } else {
-        generator.Load(argv[opt.ind]);
-    }
-    generator.Generate();
-}
-

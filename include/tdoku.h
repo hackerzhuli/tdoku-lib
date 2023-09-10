@@ -13,23 +13,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-size_t TdokuSolverDpllTriadSimd(const char *input,
-                                size_t limit,
-                                uint32_t configuration,
-                                char *solution,
-                                size_t *num_guesses);
 
-size_t TdokuEnumerate(const char *puzzle,
-                      size_t limit,
-                      void (*callback)(const char *, void *),
-                      void *callback_arg);
-
-bool TdokuConstrain(bool pencilmark, char *puzzle);
-
-bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
-#ifdef __cplusplus
-}
-#endif
+struct GenerateOut9x9{
+    uint32_t num_clues;
+    float mean_guesses;
+    float loss;
+    char data[81];
+};
 
 /**
  * Solves a Sudoku or Pencilmark Sudoku puzzle.
@@ -55,10 +45,11 @@ bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
  * @return
  *       The number of solutions found up to the given limit.
  */
-static inline size_t SolveSudoku(const char *input, size_t limit, uint32_t configuration,
-                                 char *solution, size_t *num_guesses) {
-    return TdokuSolverDpllTriadSimd(input, limit, configuration, solution, num_guesses);
-}
+size_t TdokuSolverDpllTriadSimd(const char *input,
+                                size_t limit,
+                                uint32_t configuration,
+                                char *solution,
+                                size_t *num_guesses);
 
 /**
  * Enumerates all solutions to a given Sudoku or Pencilmark Sudoku puzzle.
@@ -73,11 +64,10 @@ static inline size_t SolveSudoku(const char *input, size_t limit, uint32_t confi
  *      facilitate thunks for capturing closures.
  * @return
  */
-static inline size_t Enumerate(const char *puzzle, size_t limit,
-                               void (*callback)(const char *, void *),
-                               void *callback_arg) {
-    return TdokuEnumerate(puzzle, limit, callback, callback_arg);
-}
+size_t TdokuEnumerate(const char *puzzle,
+                      size_t limit,
+                      void (*callback)(const char *, void *),
+                      void *callback_arg);
 
 /**
  * Given a partially constrained puzzle adds random clues until the solution is unique. This
@@ -92,9 +82,8 @@ static inline size_t Enumerate(const char *puzzle, size_t limit,
  * @return
  *       A boolean indicating success or failure.
  */
-static inline bool Constrain(bool pencilmark, char *puzzle) {
-    return TdokuConstrain(pencilmark, puzzle);
-}
+bool TdokuConstrain(bool pencilmark, char *puzzle);
+
 
 /**
  * Minimizes a vanilla or pencilmark puzzle by testing removal of all clues in random order,
@@ -107,8 +96,43 @@ static inline bool Constrain(bool pencilmark, char *puzzle) {
  * @param puzzle
  *       An 81 or 729 character puzzle to minimize (for vanilla vs. pencilmark)
  */
+bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle);
+
+/**
+ * Generate classic sudoku puzzles 9x9
+ * @return
+ *       The number of puzzles generated
+ */
+size_t GenerateSudoku9x9(size_t num, int clues_to_drop, int num_evals, float clue_weight,
+    float guess_weight,
+    float random_weight, GenerateOut9x9* buffer);
+
+/**
+ * Generate classic sudoku puzzles 9x9, with default parameters
+ * @return
+ *       The number of puzzles generated
+ */
+size_t GenerateSudoku9x9Default(size_t num, GenerateOut9x9* buffer);
+
+#ifdef __cplusplus
+}
+#endif
+
 static inline bool Minimize(bool pencilmark, bool monotonic, char *puzzle) {
     return TdokuMinimize(pencilmark, monotonic, puzzle);
 }
+static inline bool Constrain(bool pencilmark, char *puzzle) {
+    return TdokuConstrain(pencilmark, puzzle);
+}
 
+static inline size_t Enumerate(const char *puzzle, size_t limit,
+                               void (*callback)(const char *, void *),
+                               void *callback_arg) {
+    return TdokuEnumerate(puzzle, limit, callback, callback_arg);
+}
+
+static inline size_t SolveSudoku(const char *input, size_t limit, uint32_t configuration,
+                                 char *solution, size_t *num_guesses) {
+    return TdokuSolverDpllTriadSimd(input, limit, configuration, solution, num_guesses);
+}
 #endif //TDOKU_H
