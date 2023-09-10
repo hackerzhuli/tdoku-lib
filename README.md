@@ -5,11 +5,8 @@ This project contains an optimized Sudoku solver and puzzle generator for conven
 "pencilmark" puzzles with clues given as negative instead of positive literals).
 
 Note: Tdoku makes heavy use of SIMD instructions up to various flavors of AVX-512 when available. As a result
-it achieves its best performance on recent Intel hardware like the Ice Lake laptop that produced the tables
-and chart above. With older processors there are moderate declines in performance down to SSSE3, and
-precipitous declines with SSE2. See the comment [here](https://github.com/t-dillon/tdoku/blob/master/src/simd_vectors.h)
-for stats on the availability of SIMD instructions from the Steam hardware survey.
-
+it achieves its best performance on recent Intel hardware like the Ice Lake laptop. With older processors there are moderate declines in performance down to SSSE3, and
+precipitous declines with SSE2.
 
 #### Building and Running
 
