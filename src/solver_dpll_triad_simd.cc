@@ -789,11 +789,11 @@ struct GeneratorDpllTriadSimd {
 };
 
 
-SolverDpllTriadSimd<0> solver_none{};
-SolverDpllTriadSimd<1> solver_last{};
-SolverDpllTriadSimd<2> solver_enum{};
+//SolverDpllTriadSimd<0> solver_none{};
+//SolverDpllTriadSimd<1> solver_last{};
+//SolverDpllTriadSimd<2> solver_enum{};
 
-GeneratorDpllTriadSimd generator{};
+//GeneratorDpllTriadSimd generator{};
 
 } // namespace
 
@@ -801,6 +801,9 @@ extern "C"
 size_t TdokuSolverDpllTriadSimd(const char *puzzle, size_t limit,
                                 uint32_t configuration,
                                 char *solution, size_t *num_guesses) {
+    SolverDpllTriadSimd<0> solver_none{};
+    SolverDpllTriadSimd<1> solver_last{};
+
     bool return_last = limit == 1 || configuration > 0;
     if (return_last) {
         return solver_last.SolveSudoku(puzzle, limit, solution, num_guesses);
@@ -812,6 +815,7 @@ size_t TdokuSolverDpllTriadSimd(const char *puzzle, size_t limit,
 extern "C"
 size_t TdokuEnumerate(const char *puzzle, size_t limit,
                       void (*callback)(const char *, void *), void *callback_arg) {
+    SolverDpllTriadSimd<2> solver_enum{};
     solver_enum.callback_ = callback;
     solver_enum.callback_arg_ = callback_arg;
     return solver_enum.SolveSudoku(puzzle, limit, nullptr, nullptr);
@@ -819,10 +823,12 @@ size_t TdokuEnumerate(const char *puzzle, size_t limit,
 
 extern "C"
 bool TdokuConstrain(bool pencilmark, char *puzzle) {
+    GeneratorDpllTriadSimd generator{};
     return generator.Constrain(pencilmark, puzzle);
 }
 
 extern "C"
 bool TdokuMinimize(bool pencilmark, bool monotonic, char *puzzle) {
+    GeneratorDpllTriadSimd generator{};
     return generator.Minimize(pencilmark, monotonic, puzzle);
 }
