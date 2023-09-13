@@ -116,7 +116,7 @@ bool TdokuMinimize(bool pencilmark, bool monotonic, char *input);
  * @return
  *       The number of puzzles generated, up to num, note that no puzzle is guaranteed to generate
  */
-size_t TdokuGenerate(size_t num, bool pencilmark, uint32_t random_seed, char* buffer, char separator);
+size_t TdokuGenerate(size_t num, bool pencilmark, uint64_t random_seed, char* buffer, char separator);
 
 /**
  * returns an rating of the puzzle

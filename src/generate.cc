@@ -159,7 +159,7 @@ struct Generator {
 };
 
 extern "C"
-size_t TdokuGenerate(size_t num, bool pencilmark, uint32_t randomSeed, char* buffer, char separator){
+size_t TdokuGenerate(size_t num, bool pencilmark, uint64_t randomSeed, char* buffer, char separator){
     Options options = Options();
     options.pencilmark = pencilmark;
     options.random_seed = randomSeed;
